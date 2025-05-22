@@ -1,32 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../store/authStore";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Input from "../components/Input";
 import { Lock } from "lucide-react";
 import toast from "react-hot-toast";
-
-
-
 
 const ResetPasswordPage = () => {
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const { resetPassword, error, isLoading, message } = useAuthStore();
-
 	const { token } = useParams();
 	const navigate = useNavigate();
+	const location = useLocation();
+
+	useEffect(() => {
+		// If the URL is using HTTPS, redirect to HTTP
+		if (window.location.protocol === 'https:') {
+			const httpUrl = `http://${window.location.host}${location.pathname}`;
+			window.location.href = httpUrl;
+		}
+	}, [location]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
 		if (password !== confirmPassword) {
-			alert("Passwords do not match");
+			toast.error("Passwords do not match");
 			return;
 		}
 		try {
 			await resetPassword(token, password);
-
 			toast.success("Password reset successfully, redirecting to login page...");
 			setTimeout(() => {
 				navigate("/login");
@@ -84,4 +88,5 @@ const ResetPasswordPage = () => {
 		</motion.div>
 	);
 };
+
 export default ResetPasswordPage;
