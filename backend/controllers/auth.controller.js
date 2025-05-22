@@ -130,7 +130,6 @@ export const forgotPassword = async (req, res) => {
 			return res.status(400).json({ success: false, message: "User not found" });
 		}
 
-		
 		const resetToken = crypto.randomBytes(20).toString("hex");
 		const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000;
 
@@ -139,7 +138,12 @@ export const forgotPassword = async (req, res) => {
 
 		await user.save();
 
-		await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
+		// Ensure the CLIENT_URL uses http:// for local development
+		const clientUrl = process.env.CLIENT_URL.replace('https://', 'http://');
+		const resetURL = `${clientUrl}/reset-password/${resetToken}`;
+		
+		console.log('Sending reset password email with URL:', resetURL);
+		await sendPasswordResetEmail(user.email, resetURL);
 
 		res.status(200).json({ success: true, message: "Password reset link sent to your email" });
 	} catch (error) {
