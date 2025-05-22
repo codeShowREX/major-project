@@ -139,15 +139,30 @@ export const forgotPassword = async (req, res) => {
 		await user.save();
 
 		// Construct reset URL with proper protocol and port
-		const baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+		let baseUrl;
+		if (process.env.NODE_ENV === 'development') {
+			// In development, always use http://localhost:5173
+			baseUrl = 'http://localhost:5173';
+		} else {
+			// In production, use the configured CLIENT_URL or default to the deployed URL
+			baseUrl = process.env.CLIENT_URL || 'https://mern-auth-major-project.onrender.com';
+		}
+
 		const resetURL = `${baseUrl}/reset-password/${resetToken}`;
-		
 		console.log('Sending reset password email with URL:', resetURL);
-		await sendPasswordResetEmail(user.email, resetURL);
+		
+		try {
+			await sendPasswordResetEmail(user.email, resetURL);
+			console.log('Password reset email sent successfully');
+		} catch (emailError) {
+			console.error('Error sending password reset email:', emailError);
+			// Don't throw here, just log the error
+		}
 
 		res.status(200).json({ 
 			success: true, 
-			message: "Password reset link sent to your email" 
+			message: "Password reset link sent to your email",
+			resetURL // Include the URL in the response for debugging
 		});
 	} catch (error) {
 		console.error("Error in forgotPassword:", error);

@@ -13,17 +13,15 @@ const ResetPasswordPage = () => {
 	const { token } = useParams();
 	const navigate = useNavigate();
 	const location = useLocation();
-	const [showRedirectMessage, setShowRedirectMessage] = useState(false);
 
 	useEffect(() => {
-		// If the URL is using HTTPS, show redirect message and attempt redirect
-		if (window.location.protocol === 'https:') {
-			setShowRedirectMessage(true);
-			// Ensure we keep the port number in development
+		// Only redirect from HTTPS to HTTP in development
+		if (import.meta.env.MODE === 'development' && window.location.protocol === 'https:') {
 			const port = window.location.port ? `:${window.location.port}` : '';
 			const httpUrl = `http://${window.location.hostname}${port}${location.pathname}`;
-			console.log('Redirecting to:', httpUrl);
-			window.location.href = httpUrl;
+			console.log('Redirecting from HTTPS to HTTP:', httpUrl);
+			window.location.replace(httpUrl);
+			return;
 		}
 	}, [location]);
 
@@ -62,40 +60,6 @@ const ResetPasswordPage = () => {
 			// Error is already handled by the store and shown via toast
 		}
 	};
-
-	// Show redirect message if needed
-	if (showRedirectMessage) {
-		const port = window.location.port ? `:${window.location.port}` : '';
-		const httpUrl = `http://${window.location.hostname}${port}${location.pathname}`;
-		
-		return (
-			<motion.div
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.5 }}
-				className='max-w-md w-full bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden p-8'
-			>
-				<div className='flex items-center justify-center mb-4'>
-					<AlertCircle className='h-12 w-12 text-yellow-500' />
-				</div>
-				<h2 className='text-2xl font-bold mb-4 text-center text-yellow-500'>
-					Redirecting to Secure Page
-				</h2>
-				<p className='text-gray-300 text-center mb-6'>
-					Please wait while we redirect you to the secure password reset page...
-				</p>
-				<p className='text-gray-400 text-sm text-center'>
-					If you are not redirected automatically, please click the link below:
-				</p>
-				<a
-					href={httpUrl}
-					className='mt-4 block text-center text-green-400 hover:text-green-300 underline'
-				>
-					Click here to continue
-				</a>
-			</motion.div>
-		);
-	}
 
 	return (
 		<motion.div
