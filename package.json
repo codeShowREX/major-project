@@ -17,6 +17,7 @@
 		"bcryptjs": "^2.4.3",
 		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.5",
+		"cross-env": "^7.0.3",
 		"crypto": "^1.0.1",
 		"dotenv": "^16.5.0",
 		"express": "^4.21.2",
@@ -26,7 +27,6 @@
 		"tailwindcss": "^4.1.7"
 	},
 	"devDependencies": {
-		"cross-env": "^7.0.3",
 		"nodemon": "^3.1.4"
 	},
 	"description": ""
