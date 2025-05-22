@@ -141,8 +141,8 @@ export const forgotPassword = async (req, res) => {
 		// Construct reset URL with proper protocol and port
 		let baseUrl;
 		if (process.env.NODE_ENV === 'development') {
-			// In development, always use http://localhost:5173
-			baseUrl = 'http://localhost:5173';
+			// In development, use the request origin or default to localhost
+			baseUrl = req.headers.origin || 'http://localhost:5173';
 		} else {
 			// In production, use the configured CLIENT_URL or default to the deployed URL
 			baseUrl = process.env.CLIENT_URL || 'https://mern-auth-major-project.onrender.com';

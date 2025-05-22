@@ -4,7 +4,7 @@ import axios from "axios";
 // Configure API URL based on environment
 const getApiUrl = () => {
 	if (import.meta.env.MODE === "development") {
-		return "http://localhost:5000/api/auth";
+		return "/api/auth"; // Use the proxy in development
 	}
 	// In production, use the same origin if the request is from the same domain
 	if (window.location.hostname === "mern-auth-major-project.onrender.com") {
