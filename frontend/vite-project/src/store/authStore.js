@@ -70,29 +70,43 @@ export const useAuthStore = create((set) => ({
 		}
 	},
 	forgotPassword: async (email) => {
-		set({ isLoading: true, error: null });
+		set({ isLoading: true, error: null, message: null });
 		try {
 			const response = await axios.post(`${API_URL}/forgot-password`, { email });
-			set({ message: response.data.message, isLoading: false });
+			set({ 
+				message: response.data.message, 
+				isLoading: false,
+				error: null 
+			});
+			return response.data;
 		} catch (error) {
+			const errorMessage = error.response?.data?.message || "Error sending reset password email";
 			set({
 				isLoading: false,
-				error: error.response.data.message || "Error sending reset password email",
+				error: errorMessage,
+				message: null
 			});
-			throw error;
+			throw new Error(errorMessage);
 		}
 	},
 	resetPassword: async (token, password) => {
-		set({ isLoading: true, error: null });
+		set({ isLoading: true, error: null, message: null });
 		try {
 			const response = await axios.post(`${API_URL}/reset-password/${token}`, { password });
-			set({ message: response.data.message, isLoading: false });
+			set({ 
+				message: response.data.message, 
+				isLoading: false,
+				error: null 
+			});
+			return response.data;
 		} catch (error) {
+			const errorMessage = error.response?.data?.message || "Error resetting password";
 			set({
 				isLoading: false,
-				error: error.response.data.message || "Error resetting password",
+				error: errorMessage,
+				message: null
 			});
-			throw error;
+			throw new Error(errorMessage);
 		}
 	},
 }));

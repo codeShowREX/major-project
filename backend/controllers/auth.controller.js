@@ -131,24 +131,30 @@ export const forgotPassword = async (req, res) => {
 		}
 
 		const resetToken = crypto.randomBytes(20).toString("hex");
-		const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000;
+		const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; // 1 hour
 
 		user.resetPasswordToken = resetToken;
 		user.resetPasswordExpiresAt = resetTokenExpiresAt;
 
 		await user.save();
 
-		// Ensure the CLIENT_URL uses http:// for local development
-		const clientUrl = process.env.CLIENT_URL.replace('https://', 'http://');
-		const resetURL = `${clientUrl}/reset-password/${resetToken}`;
+		// Construct reset URL with proper protocol and port
+		const baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+		const resetURL = `${baseUrl}/reset-password/${resetToken}`;
 		
 		console.log('Sending reset password email with URL:', resetURL);
 		await sendPasswordResetEmail(user.email, resetURL);
 
-		res.status(200).json({ success: true, message: "Password reset link sent to your email" });
+		res.status(200).json({ 
+			success: true, 
+			message: "Password reset link sent to your email" 
+		});
 	} catch (error) {
-		console.log("Error in forgotPassword ", error);
-		res.status(400).json({ success: false, message: error.message });
+		console.error("Error in forgotPassword:", error);
+		res.status(500).json({ 
+			success: false, 
+			message: "Error sending password reset email" 
+		});
 	}
 };
 
@@ -157,13 +163,23 @@ export const resetPassword = async (req, res) => {
 		const { token } = req.params;
 		const { password } = req.body;
 
+		if (!password) {
+			return res.status(400).json({ 
+				success: false, 
+				message: "Password is required" 
+			});
+		}
+
 		const user = await User.findOne({
 			resetPasswordToken: token,
 			resetPasswordExpiresAt: { $gt: Date.now() },
 		});
 
 		if (!user) {
-			return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+			return res.status(400).json({ 
+				success: false, 
+				message: "Invalid or expired reset token" 
+			});
 		}
 
 		const hashedPassword = await bcryptjs.hash(password, 10);
@@ -175,10 +191,16 @@ export const resetPassword = async (req, res) => {
 
 		await sendResetSuccessEmail(user.email);
 
-		res.status(200).json({ success: true, message: "Password reset successful" });
+		res.status(200).json({ 
+			success: true, 
+			message: "Password reset successful" 
+		});
 	} catch (error) {
-		console.log("Error in resetPassword ", error);
-		res.status(400).json({ success: false, message: error.message });
+		console.error("Error in resetPassword:", error);
+		res.status(500).json({ 
+			success: false, 
+			message: "Error resetting password" 
+		});
 	}
 };
 

@@ -4,17 +4,23 @@ import { useAuthStore } from "../store/authStore";
 import Input from "../components/Input";
 import { ArrowLeft, Loader, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const ForgotPasswordPage = () => {
 	const [email, setEmail] = useState("");
 	const [isSubmitted, setIsSubmitted] = useState(false);
 
-	const { isLoading, forgotPassword } = useAuthStore();
+	const { isLoading, forgotPassword, error } = useAuthStore();
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		await forgotPassword(email);
-		setIsSubmitted(true);
+		try {
+			await forgotPassword(email);
+			setIsSubmitted(true);
+			toast.success("If an account exists, you will receive a password reset link shortly.");
+		} catch (error) {
+			toast.error(error.message || "Error sending reset password email");
+		}
 	};
 
 	return (
@@ -42,6 +48,7 @@ const ForgotPasswordPage = () => {
 							onChange={(e) => setEmail(e.target.value)}
 							required
 						/>
+						{error && <p className='text-red-500 text-sm mt-2'>{error}</p>}
 						<motion.button
 							whileHover={{ scale: 1.02 }}
 							whileTap={{ scale: 0.98 }}
@@ -64,6 +71,12 @@ const ForgotPasswordPage = () => {
 						<p className='text-gray-300 mb-6'>
 							If an account exists for {email}, you will receive a password reset link shortly.
 						</p>
+						<Link
+							to="/login"
+							className='text-green-400 hover:text-green-300 transition-colors'
+						>
+							Return to Login
+						</Link>
 					</div>
 				)}
 			</div>
@@ -76,6 +89,5 @@ const ForgotPasswordPage = () => {
 		</motion.div>
 	);
 };
-
 
 export default ForgotPasswordPage;
